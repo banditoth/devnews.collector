@@ -25,7 +25,7 @@ namespace Pingbacker
 
         [FunctionName("PingbackerLogic")]
 #if RELEASE
-        public static void Run([TimerTrigger("1.00:00:00")] TimerInfo myTimer, ILogger log)
+        public static async void Run([TimerTrigger("1.00:00:00")] TimerInfo myTimer, ILogger log)
 #else
         public static async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = null)] HttpRequest req, ILogger log)
 #endif
