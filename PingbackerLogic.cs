@@ -184,8 +184,6 @@ namespace Pingbacker
                     log.LogError("GLOBAL Exception occured: " + ex.ToString());
                 }
             }
-
-            return new OkObjectResult(null);
         }
     }
 }
