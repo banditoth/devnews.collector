@@ -24,11 +24,7 @@ namespace Pingbacker
         private static List<RssSource> _sources;
 
         [FunctionName("PingbackerLogic")]
-#if RELEASE
         public static async void Run([TimerTrigger("1.00:00:00")] TimerInfo myTimer, ILogger log)
-#else
-        public static async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = null)] HttpRequest req, ILogger log)
-#endif
         {
             using (Stream stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("Pingbacker.feeds.json"))
             using (StreamReader reader = new StreamReader(stream))
