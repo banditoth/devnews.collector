@@ -18,20 +18,20 @@ steps:
 - task: DotNetCoreCLI@2
   inputs:
     command: 'restore'
-    projects: '$(SolutionPath)'
+    projects: '$(solution)'
   displayName: 'Restore NuGet packages'
 
 - task: DotNetCoreCLI@2
   inputs:
     command: 'build'
-    projects: '$(SolutionPath)'
+    projects: '$(solution)'
   displayName: 'Build solution'
     
 - task: DotNetCoreCLI@2
   inputs:
     command: 'publish'
     publishWebProjects: false
-    projects: '$(SolutionPath)'
+    projects: '$(solution)'
     arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)/$(buildConfiguration)'
   displayName: 'Publish solution'
 
