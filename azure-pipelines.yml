@@ -15,17 +15,25 @@ variables:
   buildConfiguration: 'Release'
 
 steps:
-- task: NuGetToolInstaller@1
-
-- task: NuGetCommand@2
+- task: DotNetCoreCLI@2
   inputs:
-    restoreSolution: '$(solution)'
+    command: 'restore'
+    projects: '$(SolutionPath)'
+  displayName: 'Restore NuGet packages'
 
+- task: DotNetCoreCLI@2
+  inputs:
+    command: 'build'
+    projects: '$(SolutionPath)'
+  displayName: 'Build solution'
+    
 - task: DotNetCoreCLI@2
   inputs:
     command: 'publish'
     publishWebProjects: false
-    projects: '**/*.csproj'
+    projects: '$(SolutionPath)'
+    arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)/$(buildConfiguration)'
+  displayName: 'Publish solution'
 
 - task: CopyFiles@2
   inputs:
