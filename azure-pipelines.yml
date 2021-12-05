@@ -24,6 +24,7 @@ steps:
 - task: DotNetCoreCLI@2
   inputs:
     command: 'build'
+    configuration: '$(buildConfiguration)'
     projects: '$(solution)'
   displayName: 'Build solution'
     
@@ -31,6 +32,7 @@ steps:
   inputs:
     command: 'publish'
     publishWebProjects: false
+    configuration: '$(buildConfiguration)'
     projects: '$(solution)'
     arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)/$(buildConfiguration)'
   displayName: 'Publish solution'
