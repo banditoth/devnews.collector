@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -24,7 +25,7 @@ namespace Pingbacker
         private static List<RssSource> _sources;
 
         [FunctionName("PingbackerLogic")]
-        public static async void Run([TimerTrigger("00 36 18 * * *")] TimerInfo myTimer, ILogger log)
+        public static async void Run([TimerTrigger("00 00 08 * * *", RunOnStartup = true)] TimerInfo myTimer, ILogger log)
         {
             using (Stream stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("Pingbacker.feeds.json"))
             using (StreamReader reader = new StreamReader(stream))
@@ -32,7 +33,7 @@ namespace Pingbacker
                 _sources = JsonConvert.DeserializeObject<List<RssSource>>(reader.ReadToEnd());
             }
 
-            for (int i = -1; i < 1; i++)
+            for (int i = -9; i < 1; i++)
             {
                 DateTime targetDate = DateTime.Now.AddDays(i);
                 log.LogInformation("Current day: " + targetDate.ToShortDateString());
