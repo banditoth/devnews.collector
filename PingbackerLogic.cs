@@ -25,56 +25,21 @@ namespace Pingbacker
         private static List<RssSource> _sources;
 
         [FunctionName("PingbackerLogic")]
-        public static async void Run([TimerTrigger("00 00 08 * * *", RunOnStartup = true)] TimerInfo myTimer, ILogger log)
+        public static async void Run([TimerTrigger("30 7 * * *")] TimerInfo myTimer, ILogger log)
         {
-            using (Stream stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("Pingbacker.feeds.json"))
-            using (StreamReader reader = new StreamReader(stream))
-            {
-                _sources = JsonConvert.DeserializeObject<List<RssSource>>(reader.ReadToEnd());
-            }
+            SetSources();
 
-            for (int i = -9; i < 1; i++)
+            for (int i = -1; i < 1; i++)
             {
                 DateTime targetDate = DateTime.Now.AddDays(i);
                 log.LogInformation("Current day: " + targetDate.ToShortDateString());
 
                 try
                 {
-                    FeedReader reader = new FeedReader();
-                    List<PostResult> results = new List<PostResult>();
-
-                    foreach (RssSource rssSource in _sources)
-                    {
-                        try
-                        {
-                            foreach (var post in reader.RetrieveFeed(rssSource.RssUrl))
-                            {
-                                if (post.PublishDate < targetDate || post.PublishDate > targetDate.AddDays(1))
-                                    continue;
-
-                                log.LogInformation($"[New result] Author blog: '{rssSource.Name}', Title: '{post.Title}'");
-
-                                results.Add(new PostResult()
-                                {
-                                    SourceId = rssSource.Id,
-                                    Categories = post.Categories?.ToList(),
-                                    Title = post.Title,
-                                    Url = post.Uri?.ToString()
-                                });
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            log.LogError($"Failed to read feed: '{rssSource.RssUrl}', exception occured. " + ex.ToString()); ;
-                            continue;
-                        }
-                    }
+                    List<PostResult> results = GetPostsFromRssFeeds(_sources, targetDate, log);
 
                     if (results.Count == 0)
                         continue;
-
-                    log.LogInformation($"[Processing] Making blog post content");
-
 
                     List<string> postCategoriesDistinct = new List<string>();
                     StringBuilder builder = new StringBuilder();
@@ -181,6 +146,51 @@ namespace Pingbacker
                     log.LogError("GLOBAL Exception occured: " + ex.ToString());
                 }
             }
+        }
+
+        private static void SetSources()
+        {
+            using (Stream stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("Pingbacker.feeds.json"))
+            using (StreamReader reader = new StreamReader(stream))
+            {
+                _sources = JsonConvert.DeserializeObject<List<RssSource>>(reader.ReadToEnd());
+            }
+        }
+
+        private static List<PostResult> GetPostsFromRssFeeds(List<RssSource> sources, DateTime targetDate, ILogger log)
+        {
+            List<PostResult> results = new List<PostResult>();
+
+            foreach (RssSource rssSource in sources)
+            {
+                FeedReader reader = new FeedReader();
+
+                try
+                {
+                    foreach (var post in reader.RetrieveFeed(rssSource.RssUrl))
+                    {
+                        if (post.PublishDate < targetDate || post.PublishDate > targetDate.AddDays(1))
+                            continue;
+
+                        log.LogInformation($"[New result] Author blog: '{rssSource.Name}', Title: '{post.Title}'");
+
+                        results.Add(new PostResult()
+                        {
+                            SourceId = rssSource.Id,
+                            Categories = post.Categories?.ToList(),
+                            Title = post.Title,
+                            Url = post.Uri?.ToString()
+                        });
+                    }
+                }
+                catch (Exception ex)
+                {
+                    log.LogError($"Failed to read feed: '{rssSource.RssUrl}', exception occured. " + ex.ToString()); ;
+                    continue;
+                }
+            }
+
+            return results;
         }
     }
 }
