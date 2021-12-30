@@ -353,5 +353,10 @@
     "Id": "ad16d80b-4d1d-430b-b8b2-ec74dacf7983",
     "Name": "dotnet catch ",
     "RssUrl": "https://www.dotnetcatch.com/feed/"
+  },
+  {
+    "Id": "a2481b6f-06ae-4e53-8e7c-c69d37171d77",
+    "Name": "Dave Murray - Sailing the Sharp Sea",
+    "RssUrl": "https://blog.taranissoftware.com/rss.xml"
   }
 ]
