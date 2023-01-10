@@ -15,41 +15,38 @@ namespace banditoth.net.DevNewsCollector
     public class DevNewsCollector
     {
         [FunctionName("Collect")]
-//#if RELEASE
-//        public void Run([TimerTrigger("0 */5 * * * *")]TimerInfo myTimer, ILogger log)
-//#elif DEBUG
+#if RELEASE
+                public void Run([TimerTrigger("0 0 10 * * *")]TimerInfo myTimer, ILogger log)
+#elif DEBUG
         public static async Task Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = null)] HttpRequest req, ILogger log)
-//#endif
+#endif
         {
             FileRssSourceProvider rssSourceProvider = new FileRssSourceProvider();
             IEnumerable<Entities.RssSource> sources = rssSourceProvider.GetRssSources();
 
-            DateTime currentDate = DateTime.Now.AddDays(-200);
+            DateTime currentDate = DateTime.Now;
 
-            for (int i = 0; i < 200; i++)
+            try
             {
-                try
+                currentDate = currentDate.AddDays(1);
+                RssGrabber grabber = new RssGrabber(sources, log);
+                IEnumerable<Entities.BlogPost> posts = await grabber.GetPostsAsync(currentDate.AddDays(-1), currentDate.AddDays(1));
+
+                using (PostContentGenerator postGenerator = new PostContentGenerator(sources, log))
                 {
-                    currentDate = currentDate.AddDays(1);
-                    RssGrabber grabber = new RssGrabber(sources, log);
-                    IEnumerable<Entities.BlogPost> posts = await grabber.GetPostsAsync(currentDate.AddDays(-1), currentDate.AddDays(1));
+                    PostContent postContent = postGenerator.GetPostContent(posts, currentDate);
 
-                    using (PostContentGenerator postGenerator = new PostContentGenerator(sources, log))
+                    using (WordPressPublisher wp = new WordPressPublisher(Environment.GetEnvironmentVariable("WP_URL"),
+                        Environment.GetEnvironmentVariable("WP_USERNAME"),
+                        Environment.GetEnvironmentVariable("WP_PASSWORD"), log))
                     {
-                        PostContent postContent = postGenerator.GetPostContent(posts, currentDate);
-
-                        using (WordPressPublisher wp = new WordPressPublisher(Environment.GetEnvironmentVariable("WP_URL"),
-                            Environment.GetEnvironmentVariable("WP_USERNAME"),
-                            Environment.GetEnvironmentVariable("WP_PASSWORD"), log))
-                        {
-                            await wp.PublishPost(postContent);
-                        }
+                        await wp.PublishPost(postContent);
                     }
                 }
-                catch (Exception ex)
-                {
-
-                }
+            }
+            catch (Exception ex)
+            {
+                log.LogError(ex, "Could not generate post, exception occured");
             }
         }
     }
