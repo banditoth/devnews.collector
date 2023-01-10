@@ -15,28 +15,40 @@ namespace banditoth.net.DevNewsCollector
     public class DevNewsCollector
     {
         [FunctionName("Collect")]
-#if RELEASE
-        public void Run([TimerTrigger("0 */5 * * * *")]TimerInfo myTimer, ILogger log)
-#elif DEBUG
+//#if RELEASE
+//        public void Run([TimerTrigger("0 */5 * * * *")]TimerInfo myTimer, ILogger log)
+//#elif DEBUG
         public static async Task Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = null)] HttpRequest req, ILogger log)
-#endif
+//#endif
         {
             FileRssSourceProvider rssSourceProvider = new FileRssSourceProvider();
             IEnumerable<Entities.RssSource> sources = rssSourceProvider.GetRssSources();
 
-            DateTime currentDate = DateTime.Now;
-            RssGrabber grabber = new RssGrabber(sources, log);
-            IEnumerable<Entities.BlogPost> posts = await grabber.GetPostsAsync(currentDate.AddDays(-1), currentDate.AddDays(1));
+            DateTime currentDate = DateTime.Now.AddDays(-200);
 
-            using(PostContentGenerator postGenerator = new PostContentGenerator(sources, log))
+            for (int i = 0; i < 200; i++)
             {
-                PostContent postContent = postGenerator.GetPostContent(posts, currentDate);
-
-                using(WordPressPublisher wp = new WordPressPublisher(Environment.GetEnvironmentVariable("WP_URL"),
-                    Environment.GetEnvironmentVariable("WP_USERNAME"),
-                    Environment.GetEnvironmentVariable("WP_PASSWORD"), log))
+                try
                 {
-                    await wp.PublishPost(postContent);
+                    currentDate = currentDate.AddDays(1);
+                    RssGrabber grabber = new RssGrabber(sources, log);
+                    IEnumerable<Entities.BlogPost> posts = await grabber.GetPostsAsync(currentDate.AddDays(-1), currentDate.AddDays(1));
+
+                    using (PostContentGenerator postGenerator = new PostContentGenerator(sources, log))
+                    {
+                        PostContent postContent = postGenerator.GetPostContent(posts, currentDate);
+
+                        using (WordPressPublisher wp = new WordPressPublisher(Environment.GetEnvironmentVariable("WP_URL"),
+                            Environment.GetEnvironmentVariable("WP_USERNAME"),
+                            Environment.GetEnvironmentVariable("WP_PASSWORD"), log))
+                        {
+                            await wp.PublishPost(postContent);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+
                 }
             }
         }
