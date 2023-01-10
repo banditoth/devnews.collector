@@ -28,7 +28,6 @@ namespace banditoth.net.DevNewsCollector
 
             try
             {
-                currentDate = currentDate.AddDays(1);
                 RssGrabber grabber = new RssGrabber(sources, log);
                 IEnumerable<Entities.BlogPost> posts = await grabber.GetPostsAsync(currentDate.AddDays(-1), currentDate.AddDays(1));
 
