@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Pingbacker.Entities
+namespace banditoth.net.DevNewsCollector.Entities
 {
     public class RssSource
     {

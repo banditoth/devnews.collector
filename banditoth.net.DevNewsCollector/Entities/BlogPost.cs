@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Pingbacker.Entities
+namespace banditoth.net.DevNewsCollector.Entities
 {
-    public class PostResult
+    public class BlogPost
     {
         public List<string> Categories { get; set; }
 
