@@ -16,7 +16,7 @@ namespace banditoth.net.DevNewsCollector
     {
         [FunctionName("Collect")]
 #if RELEASE
-                public void Run([TimerTrigger("0 0 10 * * *")]TimerInfo myTimer, ILogger log)
+                public static async Task Run([TimerTrigger("0 0 10 * * *")]TimerInfo myTimer, ILogger log)
 #elif DEBUG
         public static async Task Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = null)] HttpRequest req, ILogger log)
 #endif
