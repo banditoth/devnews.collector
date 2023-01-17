@@ -1,7 +1,7 @@
 # Daily .NET news collector and publisher
 
 
-This repository contains the automation behind the website 'https://www.devnews.banditoth.hu/'.
+This repository contains the automation behind the website 'https://www.devnews.banditoth.net/'.
 
 Using a timed Azure function, it collects the latest news based on RSS feeds from the source listed in the feeds.json file, going back a day, and publishes it to a Wordpress blog.
 
